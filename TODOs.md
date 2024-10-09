@@ -1,10 +1,13 @@
 # TODOs
 
-- Functionality
+- The config page: 
   - More Keep-like functionality for managing the list
-  - A button to cancel and go to the config from the timer
   - Configurable timing for sets / rest
   - Local storage for previous choices
+- The timer page:
+  - Explicit countdown to start rather than the 1-sec countdown that exists more
+  or less by accident.
+  - A button to cancel and go to the config from the timer
   - Activities should be highlighted as they happen in a vertical carousel. For
   inspiration:
   https://codesandbox.io/s/react-vertical-carousel-5z9rf?file=/src/Slide.js
