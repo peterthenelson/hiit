@@ -1,9 +1,9 @@
 import { SetStateAction, useEffect, useRef, useState } from 'react';
 import { PlainTextEditable } from './PlainTextEditable';
-import { Page, TimerConfig } from './config';
+import { defaultTimerConfig, Page, saveConfigToLocalStorage, TimerConfig } from './config';
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { PlusIcon } from '@heroicons/react/20/solid'
-import { ChevronUpDownIcon, XMarkIcon } from '@heroicons/react/24/solid'
+import { ArrowPathIcon, ChevronUpDownIcon, DocumentCheckIcon, PlayIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import './ConfigPage.css';
 
 export interface ConfigPageProps {
@@ -105,8 +105,16 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
   };
 
   const handleStart = () => {
-    setConfig({ ...config, exercises: itemsToExercises(items) });
     setPage(Page.Timer);
+  };
+
+  const handleReset = () => {
+    setConfig(defaultTimerConfig);
+    setItems(exercisesToItems(defaultTimerConfig.exercises));
+  };
+
+  const handleSave = () => {
+    saveConfigToLocalStorage(config);
   };
 
   // Force selection focus when focus changes in cases where it needs to be.
@@ -137,7 +145,19 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
 
   return (
     <div className="ConfigPage">
-      <h1>HIIT Timer</h1>
+      <h3>HIIT Timer</h3>
+      <div className="ConfigPage-buttons">
+        <button onClick={handleReset} className="ConfigPage-reset" >
+          <ArrowPathIcon pointerEvents="none" />
+        </button>
+        <button onClick={handleSave} className="ConfigPage-save">
+          <DocumentCheckIcon pointerEvents="none" />
+        </button>
+        <button onClick={handleStart} className="ConfigPage-start">
+          <PlayIcon pointerEvents="none" />
+        </button>
+      </div>
+      <p />
       <DragDropContext onDragEnd={handleDragEnd} >
         <Droppable droppableId="ConfigPage-droppable">
           {(provided) => (
@@ -208,8 +228,6 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
           )}
         </Droppable>
       </DragDropContext>
-      <p></p>
-      <button onClick={handleStart}>Start</button>
     </div>
   );
 }

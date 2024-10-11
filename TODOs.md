@@ -1,8 +1,10 @@
 # TODOs
 
 - The config page: 
+  - Rebuild PlainTextEditable from scratch
+  - Ability to copy the whole list and ability to paste multiple elements
   - Configurable timing for sets / rest
-  - Local storage for previous choices
+  - Replace "reset" and "save" with auto-saving and opening (uneditable) presets
 - The timer page:
   - Explicit countdown to start rather than the 1-sec countdown that exists more
   or less by accident.
