@@ -1,0 +1,69 @@
+.ConfigPage {
+  font-size: 22px;
+}
+
+.ConfigPage-droppable {
+  width: 15em; 
+  border: 1px solid black;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.ConfigPage-exercise {
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+  min-height: 30px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.ConfigPage-focused {
+  border-top: 1px solid gray;
+  border-bottom: 1px solid gray;
+}
+
+.ConfigPage-handle {
+  visibility: hidden;
+  color: gray;
+  height: 30px;
+  width: 30px;
+}
+
+.ConfigPage-exercise:hover .ConfigPage-handle {
+  visibility: visible;
+}
+
+.ConfigPage-editable {
+  flex: 1;
+  text-align: left;
+  border: none;
+  outline: 0px solid transparent;
+}
+
+.ConfigPage-remove {
+  visibility: hidden;
+  color: gray;
+  height: 30px;
+  width: 30px;
+}
+
+.ConfigPage-exercise:hover .ConfigPage-remove {
+  visibility: visible;
+}
+
+.ConfigPage-focused .ConfigPage-remove {
+  visibility: visible;
+}
+
+.ConfigPage-plus {
+  color: gray;
+  height: 24px;
+  width: 30px;
+}
+
+.ConfigPage-insert {
+  color: gray;
+  font-size: 85%;
+  font-variant: small-caps;
+}

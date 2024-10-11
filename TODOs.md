@@ -1,7 +1,6 @@
 # TODOs
 
 - The config page: 
-  - More Keep-like functionality for managing the list
   - Configurable timing for sets / rest
   - Local storage for previous choices
 - The timer page:

@@ -22,7 +22,7 @@ export const defaultTimerConfig: TimerConfig = {
     'Bicep Curls',
     'Lunges',
     'Sumo Squats',
-    'Dumbell Swings',
+    'Dumbbell Swings',
     'Half-kneeling Rows',
     'Chest Fly',
     'Clamshells',
