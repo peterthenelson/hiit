@@ -1,5 +1,5 @@
 import { SetStateAction, useEffect, useRef, useState } from 'react';
-import { PlainTextEditable } from './PlainTextEditable';
+import { PlainTextEditable, setCaret } from './PlainTextEditable';
 import { defaultTimerConfig, Page, saveConfigToLocalStorage, TimerConfig } from './config';
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { PlusIcon } from '@heroicons/react/20/solid'
@@ -58,9 +58,6 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
   };
 
   const handleEditKey = (item: Item, index: number, e: React.KeyboardEvent<HTMLElement>) => {
-    // TODO: Just rewrite my own contexteditable component and avoid the weird
-    // brittle assumptions and workarounds about carets and selections and stale
-    // closures and timeouts and empty text nodes.
     const sel = document.getSelection();
     const range = sel?.getRangeAt(0);
     console.assert(range?.startContainer === range?.endContainer);
@@ -117,30 +114,12 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
     saveConfigToLocalStorage(config);
   };
 
-  // Force selection focus when focus changes in cases where it needs to be.
+  // Force selection to move when focus changes.
   useEffect(() => {
-    if (focusRef.current === null || focus.type !== 'ITEM') {
+    if (focus.type !== 'ITEM') {
       return;
     }
-    const sel = document.getSelection();
-    const currentRange = sel?.getRangeAt(0);
-    if (sel === null || currentRange === undefined ||
-        focusRef.current.contains(currentRange.startContainer) ||
-        focusRef.current.contains(currentRange.endContainer)) {
-      return;
-    }
-    const range = document.createRange();
-    if (focusRef.current.firstChild) {
-      range.setStart(
-        focusRef.current.firstChild as Node,
-        focus.offset !== undefined ? focus.offset : focusRef.current.firstChild?.textContent?.length || 0);
-    }  else {
-      range.setStart(focusRef.current, 0);
-    }
-    range.collapse(true);
-    sel.removeAllRanges();
-    // TODO: this feels incredibly stupid.
-    setTimeout(() => sel.addRange(range));
+    setCaret(focusRef, focus.offset);
   }, [focus]);
 
   return (

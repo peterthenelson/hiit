@@ -20,7 +20,37 @@ export interface PlainTextEditableProps {
   onKeyUp?: (event: React.KeyboardEvent<HTMLElement>) => void
 }
 
-// TODO: really do the proper ref-wrapping instead.
+// Set the caret for the PlainTextEditable (at the relevant ref) if it's not
+// already inside it. Defaults to putting the caret at the end, but optionally
+// takes an offset.
+export function setCaret(ref: React.RefObject<HTMLElement | null>, offset?: number) {
+  if (ref.current === null) {
+    return;
+  }
+  const sel = document.getSelection();
+  const currentRange = sel?.getRangeAt(0);
+  if (sel === null || currentRange === undefined ||
+      ref.current.contains(currentRange.startContainer) ||
+      ref.current.contains(currentRange.endContainer)) {
+    return;
+  }
+  const range = document.createRange();
+  const first = ref.current.childNodes.item(0);
+  if (first) {
+    range.setStart(
+      first, offset !== undefined ? offset : first.textContent?.length || 0);
+  }  else {
+    range.setStart(ref.current, 0);
+  }
+  range.collapse(true);
+  sel.removeAllRanges();
+  // TODO: this feels incredibly stupid.
+  setTimeout(() => sel.addRange(range));
+}
+
+// TODO: Just rewrite my own contexteditable component and avoid the weird
+// brittle assumptions and workarounds about carets and selections and stale
+// closures and timeouts and empty text nodes.
 export function PlainTextEditable(props: PlainTextEditableProps) {
   // You would think this would all be easier with useState, but alas, the
   // library: https://github.com/lovasoa/react-contenteditable/issues/161
