@@ -1,10 +1,12 @@
+import React from 'react';
 import { SetStateAction, useEffect, useRef, useState } from 'react';
 import { PlainTextEditable, setCaret } from './PlainTextEditable';
-import { defaultTimerConfig, Page, saveConfigToLocalStorage, TimerConfig } from './config';
+import { armsPreset, chestPreset, defaultPreset, Page, saveConfigToLocalStorage, TimerConfig } from './config';
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { PlusIcon } from '@heroicons/react/20/solid'
-import { ArrowPathIcon, ChevronUpDownIcon, DocumentCheckIcon, PlayIcon, XMarkIcon } from '@heroicons/react/24/solid'
+import { FolderOpenIcon, ChevronUpDownIcon, PlayIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import './ConfigPage.css';
+import { Dropdown } from 'react-bootstrap';
 
 export interface ConfigPageProps {
   config: TimerConfig,
@@ -38,6 +40,24 @@ function hasFocus(item: Item, focus: FocusState): boolean {
   return focus.type === 'ITEM' && focus.id === item.id;
 }
 
+type ButtonProps = React.HTMLProps<HTMLButtonElement>;
+const PresetsToggle = React.forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => (
+  <button
+    ref={ref}
+    className='ConfigPage-presets'
+    onClick={(e) => {
+      if (props.onClick) {
+        e.preventDefault();
+        props.onClick(e);
+      }
+    }}
+  >
+    {props.children}
+  </button>
+
+));
+
+// TODO: Add functionality to adjust numSets, activeSecs, restSecs.
 export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
   const [items, setItems] = useState(exercisesToItems(config.exercises));
   const [nextId, setNextId] = useState(config.exercises.length);
@@ -46,7 +66,9 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
 
   const updateItems = (items: Item[]) => {
     setItems(items);
-    setConfig({ ...config, exercises: itemsToExercises(items) });
+    const newConfig = { ...config, exercises: itemsToExercises(items) };
+    setConfig(newConfig);
+    saveConfigToLocalStorage(newConfig);
   }
 
   const handleDragEnd = (result: DropResult) => {
@@ -105,12 +127,20 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
     setPage(Page.Timer);
   };
 
-  const handleReset = () => {
-    setConfig(defaultTimerConfig);
-    setItems(exercisesToItems(defaultTimerConfig.exercises));
-  };
-
-  const handleSave = () => {
+  const handlePresets = (eventKey: string | null) => {
+    let config: TimerConfig | null = null;
+    if (eventKey === 'default') {
+      config = defaultPreset();
+    } else if (eventKey === 'arms') {
+      config = armsPreset();
+    } else if (eventKey === 'chest') {
+      config = chestPreset();
+    } else {
+      console.warn(`Invalid preset name: ${eventKey}`);
+      return;
+    }
+    setConfig(config);
+    setItems(exercisesToItems(config.exercises));
     saveConfigToLocalStorage(config);
   };
 
@@ -124,14 +154,18 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
 
   return (
     <div className="ConfigPage">
-      <h3>HIIT Timer</h3>
+      <h2>HIIT Timer</h2>
       <div className="ConfigPage-buttons">
-        <button onClick={handleReset} className="ConfigPage-reset" >
-          <ArrowPathIcon pointerEvents="none" />
-        </button>
-        <button onClick={handleSave} className="ConfigPage-save">
-          <DocumentCheckIcon pointerEvents="none" />
-        </button>
+        <Dropdown onSelect={handlePresets}>
+          <Dropdown.Toggle as={PresetsToggle}>
+            <FolderOpenIcon pointerEvents="none" />
+          </Dropdown.Toggle>
+          <Dropdown.Menu>
+            <Dropdown.Item eventKey="default">Mix (default)</Dropdown.Item>
+            <Dropdown.Item eventKey="arms">Biceps and Triceps</Dropdown.Item>
+            <Dropdown.Item eventKey="chest">Chest</Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
         <button onClick={handleStart} className="ConfigPage-start">
           <PlayIcon pointerEvents="none" />
         </button>

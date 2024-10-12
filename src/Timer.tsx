@@ -25,6 +25,8 @@ interface TimerState {
   totalSeconds: number;
 }
 
+// TODO: Update the timer to respect the numSets, activeSecs, restSecs instead
+// of just hardcoding the assumption of 1 / 50 / 10.
 function activityAt(exercises: string[], totalSeconds: number): string {
   const secs = totalSeconds % 60;
   if (totalSeconds === 0) {

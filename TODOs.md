@@ -4,11 +4,11 @@
   - Rebuild PlainTextEditable from scratch
   - Ability to copy the whole list and ability to paste multiple elements
   - Configurable timing for sets / rest
-  - Replace "reset" and "save" with auto-saving and opening (uneditable) presets
 - The timer page:
   - Explicit countdown to start rather than the 1-sec countdown that exists more
   or less by accident.
-  - A button to cancel and go to the config from the timer
+  - Style timer UI similarly to the config
+  - A back button (to return to config) and a play/pause button
   - Activities should be highlighted as they happen in a vertical carousel. For
   inspiration:
   https://codesandbox.io/s/react-vertical-carousel-5z9rf?file=/src/Slide.js

@@ -72,22 +72,18 @@
   display: inline-flex;
 }
 
-.ConfigPage-reset, .ConfigPage-save, .ConfigPage-start {
+.ConfigPage-presets, .ConfigPage-start {
   width: 35px;
   height: 35px;
   border: 0px solid transparent;
 }
 
-.ConfigPage-reset:hover, .ConfigPage-save:hover, .ConfigPage-start:hover {
+.ConfigPage-presets:hover, .ConfigPage-start:hover {
   background-color: darkgray;
 }
 
-.ConfigPage-reset {
+.ConfigPage-presets {
   border-radius: 8px 0 0 8px;
-}
-
-.ConfigPage-save {
-  border-radius: 0;
 }
 
 .ConfigPage-start {
