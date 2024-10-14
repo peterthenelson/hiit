@@ -44,7 +44,8 @@ type ButtonProps = React.HTMLProps<HTMLButtonElement>;
 const PresetsToggle = React.forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => (
   <button
     ref={ref}
-    className='ConfigPage-presets'
+    className="ConfigPage-presets"
+    title="Presets"
     onClick={(e) => {
       if (props.onClick) {
         e.preventDefault();
@@ -64,11 +65,14 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
   const [focus, setFocus] = useState<FocusState>({ type: 'NONE' });
   const focusRef: React.MutableRefObject<HTMLElement | null> = useRef(null);
 
-  const updateItems = (items: Item[]) => {
-    setItems(items);
-    const newConfig = { ...config, exercises: itemsToExercises(items) };
+  const updateConfig = (newConfig: TimerConfig) => {
     setConfig(newConfig);
     saveConfigToLocalStorage(newConfig);
+  }
+
+  const updateItems = (items: Item[]) => {
+    setItems(items);
+    updateConfig({ ...config, exercises: itemsToExercises(items) });
   }
 
   const handleDragEnd = (result: DropResult) => {
@@ -166,11 +170,36 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
             <Dropdown.Item eventKey="chest">Chest</Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>
-        <button onClick={handleStart} className="ConfigPage-start">
+        <button onClick={handleStart} className="ConfigPage-start" title="Start Timer">
           <PlayIcon pointerEvents="none" />
         </button>
       </div>
-      <p />
+      <div className="ConfigPage-num-settings">
+        <label title="Active seconds" htmlFor="ConfigPage-active">Active </label>
+        <input
+          id="ConfigPage-active"
+          title="Active seconds"
+          type="number"
+          value={config.activeSecs}
+          onChange={(e) => updateConfig({ ...config, activeSecs: e.target.valueAsNumber })}
+        />
+        <label title="Rest seconds" htmlFor="ConfigPage-rest">Rest</label>
+        <input
+          id="ConfigPage-rest"
+          title="Rest seconds"
+          type="number"
+          value={config.restSecs}
+          onChange={(e) => updateConfig({ ...config, restSecs: e.target.valueAsNumber })}
+        />
+        <label title="Number of Sets" htmlFor="ConfigPage-sets">Sets</label>
+        <input
+          id="ConfigPage-sets"
+          title="Number of Sets"
+          type="number"
+          value={config.numSets}
+          onChange={(e) => updateConfig({ ...config, numSets: e.target.valueAsNumber })}
+        />
+      </div>
       <DragDropContext onDragEnd={handleDragEnd} >
         <Droppable droppableId="ConfigPage-droppable">
           {(provided) => (

@@ -1,0 +1,26 @@
+.Timer {
+  font-size: 22px;
+  width: 15em; 
+}
+
+.Timer-buttons {
+  display: inline-flex;
+}
+
+.Timer-exit, .Timer-pause {
+  width: 35px;
+  height: 35px;
+  border: 0px solid transparent;
+}
+
+.Timer-exit:hover, .Timer-pause:hover {
+  background-color: darkgray;
+}
+
+.Timer-exit {
+  border-radius: 8px 0 0 8px;
+}
+
+.Timer-pause {
+  border-radius: 0 8px 8px 0;
+}

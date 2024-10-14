@@ -13,3 +13,4 @@ This favicon was generated using the following graphic from Twitter Twemoji:
 
 - The alarm sound is from [freesound](https://freesound.org/people/JulesV4/sounds/615949/) and is available under [CC0](https://creativecommons.org/public-domain/cc0/) (i.e., public domain).
 - The tick sound is from [Pixabay](https://pixabay.com/sound-effects/plastic-quartz-clock-ticking-71695/) and is available under the [Pixabay license](https://pixabay.com/service/license-summary/). It has been edited down to a single tick.
+- The beep sound is from [freesound](https://freesound.org/people/Musik-Fan/sounds/696048/) and is available under [CC0](https://creativecommons.org/public-domain/cc0/) (i.e., public domain). It has been edited down to a single beep.

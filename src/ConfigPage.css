@@ -1,9 +1,9 @@
 .ConfigPage {
   font-size: 22px;
+  width: 15em; 
 }
 
 .ConfigPage-droppable {
-  width: 15em; 
   border: 1px solid black;
   border-radius: 8px;
   padding: 8px;
@@ -88,4 +88,18 @@
 
 .ConfigPage-start {
   border-radius: 0 8px 8px 0;
+}
+
+.ConfigPage-num-settings label {
+  color: gray;
+  font-size: 75%;
+  font-variant: small-caps;
+}
+
+.ConfigPage-num-settings input {
+  font-size: 80%;
+  width: 60px;
+  margin-left: 3px;
+  margin-right: 3px;
+  border: 0px solid transparent;
 }
