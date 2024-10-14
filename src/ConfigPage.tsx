@@ -58,7 +58,6 @@ const PresetsToggle = React.forwardRef<HTMLButtonElement, ButtonProps>((props, r
 
 ));
 
-// TODO: Add functionality to adjust numSets, activeSecs, restSecs.
 export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
   const [items, setItems] = useState(exercisesToItems(config.exercises));
   const [nextId, setNextId] = useState(config.exercises.length);

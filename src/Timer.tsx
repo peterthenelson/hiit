@@ -98,7 +98,6 @@ function formatSeconds(secs: number) {
   return s;
 }
 
-// TODO move to a function-style component.
 export class Timer extends Component<TimerProps, TimerState> {
   private tickInterval: NodeJS.Timeout | null;
   private beepAudio: HTMLAudioElement;
@@ -124,14 +123,12 @@ export class Timer extends Component<TimerProps, TimerState> {
     this.handleSpaceBarPress = this.handleSpaceBarPress.bind(this);
   }
   
-  // TODO fix duplicate wake-lock stuff (see console warnings)
   componentDidMount() {
     document.addEventListener('keydown', this.handleSpaceBarPress);
     this.props.wakelock.request();
     this.tickInterval = setInterval(this.tick, 1000);
   }
 
-  // TODO fix duplicate wake-lock stuff (see console warnings)
   componentWillUnmount() {
     document.removeEventListener('keydown', this.handleSpaceBarPress);
     this.clearTickInterval();
