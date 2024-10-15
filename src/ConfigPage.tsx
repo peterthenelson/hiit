@@ -3,8 +3,8 @@ import { SetStateAction, useEffect, useRef, useState } from 'react';
 import { PlainTextEditable, setCaret } from './PlainTextEditable';
 import { armsPreset, chestPreset, defaultPreset, Page, saveConfigToLocalStorage, TimerConfig } from './config';
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
-import { PlusIcon } from '@heroicons/react/20/solid'
-import { FolderOpenIcon, ChevronUpDownIcon, PlayIcon, XMarkIcon } from '@heroicons/react/24/solid'
+import { PlusIcon, ClipboardDocumentListIcon, XMarkIcon } from '@heroicons/react/20/solid'
+import { FolderOpenIcon, ChevronUpDownIcon, PlayIcon } from '@heroicons/react/24/solid'
 import './ConfigPage.css';
 import { Dropdown } from 'react-bootstrap';
 
@@ -251,19 +251,32 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
                 </Draggable>
               ))}
               {provided.placeholder}
-              <div
-                className="ConfigPage-exercise ConfigPage-insert"
-                onClick={() => {
-                  items.push({ id: nextId, content: '' });
-                  setFocus({ type: 'ITEM', id: nextId });
-                  setNextId(nextId+1);
-                  updateItems(items);
-                }}
-              >
-                <PlusIcon
-                  pointerEvents="none"
-                  className="ConfigPage-plus" />
-                Add Exercise
+              <div className="ConfigPage-exercise ConfigPage-pseudoexercise">
+                <div
+                  className="ConfigPage-insert"
+                  onClick={() => {
+                    items.push({ id: nextId, content: '' });
+                    setFocus({ type: 'ITEM', id: nextId });
+                    setNextId(nextId+1);
+                    updateItems(items);
+                  }}
+                >
+                  <PlusIcon
+                    pointerEvents="none"
+                    className="ConfigPage-plus" />
+                  Add Exercise
+                </div>
+                <div
+                  className="ConfigPage-copy"
+                  onClick={() => {
+                    navigator.clipboard.writeText(items.map((i) => i.content).join('\n'));
+                  }}
+                >
+                  Copy Set
+                  <ClipboardDocumentListIcon
+                    pointerEvents="none"
+                    className="ConfigPage-clipboard" />
+                </div>
               </div>
             </div>
           )}

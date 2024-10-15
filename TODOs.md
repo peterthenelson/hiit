@@ -1,9 +1,6 @@
 # TODOs
 
-- Layout
-  - Properly center icons in buttons
 - The config page: 
-  - Ability to copy the whole list
   - Ability to paste multiple elements
 - The timer page:
   - Style timer UI similarly to the config

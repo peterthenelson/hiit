@@ -52,20 +52,31 @@
   visibility: visible;
 }
 
+.ConfigPage-handle:hover, .ConfigPage-remove:hover {
+  color: darkgray;
+}
+
 .ConfigPage-focused .ConfigPage-remove {
   visibility: visible;
 }
 
-.ConfigPage-plus {
+.ConfigPage-pseudoexercise {
   color: gray;
+  font-size: 85%;
+  font-variant: small-caps;
+}
+
+.ConfigPage-plus, .ConfigPage-clipboard {
   height: 24px;
   width: 30px;
 }
 
-.ConfigPage-insert {
-  color: gray;
-  font-size: 85%;
-  font-variant: small-caps;
+.ConfigPage-copy {
+  margin-left: auto;
+}
+
+.ConfigPage-insert:hover, .ConfigPage-copy:hover {
+  color: darkgray;
 }
 
 .ConfigPage-buttons {
@@ -75,6 +86,9 @@
 .ConfigPage-presets, .ConfigPage-start {
   width: 35px;
   height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border: 0px solid transparent;
 }
 
