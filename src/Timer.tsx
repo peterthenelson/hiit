@@ -14,9 +14,10 @@ export interface TimerProps {
 }
 
 export interface Tick {
-  clockLabel: string;
-  clockSecs: number;
-  clockColor: string;
+  label: string;
+  labelKey: string;
+  secs: number;
+  color: string;
   tts?: string;
   sfx?: 'TICK' | 'BEEP' | 'ALARM';
   done?: boolean;
@@ -25,9 +26,10 @@ export interface Tick {
 export function tickAt(config: TimerConfig, n: number): Tick {
   if (n < 3) {
     return {
-      clockLabel: 'Get Ready...',
-      clockSecs: 3 - n,
-      clockColor: 'orange',
+      label: 'Get Ready...',
+      labelKey: 'ready',
+      secs: 3 - n,
+      color: 'orange',
       tts: n === 0 ? 'Get ready' : undefined,
       sfx: 'BEEP',
     };
@@ -38,31 +40,36 @@ export function tickAt(config: TimerConfig, n: number): Tick {
   const sessionLength = setLength * config.numSets;
   if (n >= sessionLength) {
     return {
-      clockLabel: 'Done!',
-      clockSecs: 0,
-      clockColor: 'black',
+      label: 'Done!',
+      labelKey: 'done',
+      secs: 0,
+      color: 'black',
       tts: n === sessionLength ? 'Done' : undefined,
       sfx: n === sessionLength ? 'ALARM' : undefined,
       done: n > sessionLength,
     };
   }
+  const setIdx = Math.floor(n / setLength);
   n %= setLength;
-  const ex = config.exercises[Math.floor(n / exLength)];
+  const exIdx = Math.floor(n / exLength);
+  const ex = config.exercises[exIdx];
   n %= exLength;
   if (n < config.activeSecs) {
     return {
-      clockLabel: ex,
-      clockSecs: config.activeSecs - n,
-      clockColor: 'red',
+      label: ex,
+      labelKey: `active.${setIdx}.${exIdx}`,
+      secs: config.activeSecs - n,
+      color: 'red',
       tts: n === 0 ? ex : undefined,
       sfx: (config.activeSecs - n) <= 3 ? 'BEEP' : 'TICK',
     };
   }
   n -= config.activeSecs;
   return {
-      clockLabel: 'Rest',
-      clockSecs: config.restSecs - n,
-      clockColor: 'green',
+      label: 'Rest',
+      labelKey: `rest.${setIdx}.${exIdx}`,
+      secs: config.restSecs - n,
+      color: 'green',
       tts: n === 0 ? 'Rest' : undefined,
       sfx: (config.restSecs - n) <= 3 ? 'BEEP' : 'TICK',
   };
@@ -98,12 +105,39 @@ function formatSeconds(secs: number) {
   return s;
 }
 
+// TODO: Do the more efficient thing and make a stateful (or at least memoized)
+// tickAt() instead of recalculating everything constantly.
+export function getPrevNext(config: TimerConfig, n: number): [[string, string]?, [string, string]?] {
+  const current = tickAt(config, n);
+  let prev: [string, string] | undefined = undefined;
+  let next: [string, string] | undefined = undefined;
+  for (let i = n - 1; i >= 0; i--) {
+    const earlier = tickAt(config, i);
+    if (earlier.labelKey !== current.labelKey) {
+      prev = [earlier.label, earlier.labelKey];
+      break;
+    }
+  }
+  for (let i = n + 1; true; i++) {
+    const later = tickAt(config, i);
+    if (later.labelKey !== current.labelKey) {
+      next = [later.label, later.labelKey];
+      break;
+    } else if (later.done) {
+      break;
+    }
+  }
+  return [prev, next];
+}
+
 export class Timer extends Component<TimerProps, TimerState> {
   private tickInterval: NodeJS.Timeout | null;
   private beepAudio: HTMLAudioElement;
   private tickAudio: HTMLAudioElement;
   private alarmAudio: HTMLAudioElement;
   private tickUi: Tick;
+  private prevActivity?: [string, string];
+  private nextActivity?: [string, string];
 
   constructor(props: TimerProps) {
     super(props);
@@ -117,6 +151,7 @@ export class Timer extends Component<TimerProps, TimerState> {
     this.tickAudio = new Audio(tickSound);
     this.alarmAudio = new Audio(alarmSound);
     this.tickUi = tickAt(props.config, 0);
+    [this.prevActivity, this.nextActivity] = getPrevNext(props.config, 0);
     // TODO: Is this the idiomatic thing to do?
     this.tick = this.tick.bind(this);
     this.toggleTimer = this.toggleTimer.bind(this);
@@ -192,6 +227,7 @@ export class Timer extends Component<TimerProps, TimerState> {
     }
     const tickCount = this.state.tickCount + 1;
     this.tickUi = tickAt(this.props.config, tickCount);
+    [this.prevActivity, this.nextActivity] = getPrevNext(this.props.config, tickCount);
     this.triggerAudio();
     if (this.tickUi.done) {
       this.clearTickInterval();
@@ -203,9 +239,6 @@ export class Timer extends Component<TimerProps, TimerState> {
   };
 
   render() {
-    const activity = this.tickUi.clockLabel;
-    const color = this.tickUi.clockColor;
-    const seconds = formatSeconds(this.tickUi.clockSecs);
     return (
       <div className="Timer">
         <h2>HIIT Timer</h2>
@@ -223,9 +256,19 @@ export class Timer extends Component<TimerProps, TimerState> {
             <PlayPauseIcon pointerEvents="none" />
           </button>
         </div>
-        <div>
-          <h3 style={{color: color}}>{activity}</h3>
-          <h3 style={{color: color}}>{seconds}</h3>
+        <div className="Timer-face">
+          <div className="Timer-item Timer-seconds" key={this.tickUi.labelKey + '-secs'}>
+            <div className="Timer-text">{formatSeconds(this.tickUi.secs)}</div>
+          </div>
+          <div className="Timer-item Timer-prev" key={this.prevActivity?.[1] || 'no-prev'}>
+            <div className="Timer-text">{this.prevActivity?.[0] || ''}</div>
+          </div>
+          <div className="Timer-item Timer-current" key={this.tickUi.labelKey}>
+            <div className="Timer-text" style={{color: this.tickUi.color}}>{this.tickUi.label}</div>
+          </div>
+          <div className="Timer-item Timer-next" key={this.nextActivity?.[1] || 'no-next'}>
+            <div className="Timer-text">{this.nextActivity?.[0]}</div>
+          </div>
         </div>
         <p>Press spacebar to start/pause the timer.</p>
       </div>

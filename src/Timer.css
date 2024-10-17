@@ -1,6 +1,6 @@
 .Timer {
   font-size: 22px;
-  width: 15em; 
+  width: 330px; 
 }
 
 .Timer-buttons {
@@ -26,4 +26,99 @@
 
 .Timer-pause {
   border-radius: 0 8px 8px 0;
+}
+
+:root {
+  --timer-face-width: 330px;
+  --timer-face-height: 200px;
+  --timer-face-padding: 15px;
+  --timer-item-height: 40px;
+  --timer-item-scale: 1.3;
+}
+
+.Timer-face {
+  position: relative;
+  width: var(--timer-face-width);
+  height: var(--timer-face-height);
+  border: 1px solid black;
+  border-radius: 8px;
+  font-size: 28px;
+}
+
+.Timer-item {
+  width: var(--timer-face-width);
+  height: var(--timer-item-height);
+  position: absolute;
+}
+
+.Timer-seconds {
+  top: var(--timer-face-padding);
+}
+
+.Timer-seconds .Timer-text {
+  animation: Timer-anim-seconds-text 1s ease-in;
+  font-size: 30px;
+  scale: 1;
+}
+
+@keyframes Timer-anim-seconds-text {
+  0% { scale: 1; }
+  10% { scale: 1.1; }
+  15%, 100% { scale: 1; }
+}
+
+.Timer-prev {
+  animation: Timer-anim-prev 1s ease-in;
+  top: var(--timer-face-padding);
+}
+
+.Timer-prev .Timer-text {
+  animation: Timer-anim-prev-text 1s ease-in;
+  scale: 1;
+  opacity: 0%;
+}
+
+@keyframes Timer-anim-prev {
+  0% { top: calc((var(--timer-face-height) - var(--timer-item-height))/2); }
+  100% { top: var(--timer-face-padding); }
+}
+
+@keyframes Timer-anim-prev-text {
+  0% { scale: var(--timer-item-scale); opacity: 100%; }
+  75%, 100% { scale: 1; opacity: 0%; }
+}
+
+.Timer-current {
+  animation: Timer-anim-current 1s ease-in;
+  top: calc((var(--timer-face-height) - var(--timer-item-height))/2);
+}
+
+.Timer-current .Timer-text {
+  animation: Timer-anim-current-text 1s ease-in;
+  scale: var(--timer-item-scale);
+}
+
+@keyframes Timer-anim-current {
+  0% { top: calc(var(--timer-face-height) - var(--timer-face-padding) - var(--timer-item-height)); }
+  100% { top: calc((var(--timer-face-height) - var(--timer-item-height))/2); }
+}
+
+@keyframes Timer-anim-current-text {
+  0% { scale: 1; }
+  100% { scale: var(--timer-item-scale); }
+}
+
+.Timer-next {
+  top: calc(var(--timer-face-height) - var(--timer-face-padding) - var(--timer-item-height));
+}
+
+.Timer-next .Timer-text {
+  animation: Timer-anim-next-text 1s ease-in;
+  scale: 1;
+  opacity: 100%;
+}
+
+@keyframes Timer-anim-next-text {
+  0%, 10% { scale: .2; opacity: 0%; }
+  100% { scale: 1; opacity: 100%; }
 }

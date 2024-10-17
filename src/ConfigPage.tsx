@@ -70,7 +70,7 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
   }
 
   const updateItems = (items: Item[]) => {
-    setItems(items);
+    setItems(Array.from(items));
     updateConfig({ ...config, exercises: itemsToExercises(items) });
   }
 
@@ -173,32 +173,6 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
           <PlayIcon pointerEvents="none" />
         </button>
       </div>
-      <div className="ConfigPage-num-settings">
-        <label title="Active seconds" htmlFor="ConfigPage-active">Active </label>
-        <input
-          id="ConfigPage-active"
-          title="Active seconds"
-          type="number"
-          value={config.activeSecs}
-          onChange={(e) => updateConfig({ ...config, activeSecs: e.target.valueAsNumber })}
-        />
-        <label title="Rest seconds" htmlFor="ConfigPage-rest">Rest</label>
-        <input
-          id="ConfigPage-rest"
-          title="Rest seconds"
-          type="number"
-          value={config.restSecs}
-          onChange={(e) => updateConfig({ ...config, restSecs: e.target.valueAsNumber })}
-        />
-        <label title="Number of Sets" htmlFor="ConfigPage-sets">Sets</label>
-        <input
-          id="ConfigPage-sets"
-          title="Number of Sets"
-          type="number"
-          value={config.numSets}
-          onChange={(e) => updateConfig({ ...config, numSets: e.target.valueAsNumber })}
-        />
-      </div>
       <DragDropContext onDragEnd={handleDragEnd} >
         <Droppable droppableId="ConfigPage-droppable">
           {(provided) => (
@@ -282,6 +256,32 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
           )}
         </Droppable>
       </DragDropContext>
+      <div className="ConfigPage-num-settings">
+        <label title="Active seconds" htmlFor="ConfigPage-active">Active </label>
+        <input
+          id="ConfigPage-active"
+          title="Active seconds"
+          type="number"
+          value={config.activeSecs}
+          onChange={(e) => updateConfig({ ...config, activeSecs: e.target.valueAsNumber })}
+        />
+        <label title="Rest seconds" htmlFor="ConfigPage-rest">Rest</label>
+        <input
+          id="ConfigPage-rest"
+          title="Rest seconds"
+          type="number"
+          value={config.restSecs}
+          onChange={(e) => updateConfig({ ...config, restSecs: e.target.valueAsNumber })}
+        />
+        <label title="Number of Sets" htmlFor="ConfigPage-sets">Sets</label>
+        <input
+          id="ConfigPage-sets"
+          title="Number of Sets"
+          type="number"
+          value={config.numSets}
+          onChange={(e) => updateConfig({ ...config, numSets: e.target.valueAsNumber })}
+        />
+      </div>
     </div>
   );
 }
