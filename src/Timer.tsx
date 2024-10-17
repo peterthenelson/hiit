@@ -1,9 +1,10 @@
 import { Component, SetStateAction } from 'react';
 import { Page, TimerConfig } from './config';
 import { WakeLockWrapper } from './wake-lock-wrapper';
-import beepSound from './beep.mp3';
-import tickSound from './tick.mp3';
 import alarmSound from './alarm.mp3';
+import beepSound from './beep.mp3';
+import startSound from './start.mp3';
+import tickSound from './tick.mp3';
 import './Timer.css';
 import { ArrowLeftCircleIcon, PlayPauseIcon } from '@heroicons/react/24/solid';
 
@@ -19,60 +20,95 @@ export interface Tick {
   secs: number;
   color: string;
   tts?: string;
-  sfx?: 'TICK' | 'BEEP' | 'ALARM';
+  sfx?: 'START' | 'TICK' | 'BEEP' | 'ALARM';
   done?: boolean;
 }
 
-export function tickAt(config: TimerConfig, n: number): Tick {
-  if (n < 3) {
-    return {
-      label: 'Get Ready...',
-      labelKey: 'ready',
-      secs: 3 - n,
-      color: 'orange',
-      tts: n === 0 ? 'Get ready' : undefined,
-      sfx: 'BEEP',
-    };
+export class TickMap {
+  private ticks: Tick[] = [];
+
+  constructor(config: TimerConfig) {
+    this.ticks = [];
+    for (let i = 0; i < 3; i++) {
+      this.ticks.push({
+        label: 'Get Ready...',
+        labelKey: 'ready',
+        secs: 3 - i,
+        color: 'orange',
+        tts: i === 0 ? 'Get ready' : undefined,
+        sfx: 'BEEP',
+      });
+    }
+    for (let setIdx = 0; setIdx < config.numSets; setIdx++) {
+      for (let exIdx = 0; exIdx < config.exercises.length; exIdx++) {
+        const ex = config.exercises[exIdx];
+        for (let i = 0; i < config.activeSecs; i++) {
+          this.ticks.push({
+            label: ex,
+            labelKey: `active.${setIdx}.${exIdx}`,
+            secs: config.activeSecs - i,
+            color: 'red',
+            tts: i === 0 ? ex : undefined,
+            sfx: i === 0 ? 'START' : ((config.activeSecs - i) <= 3 ? 'BEEP' : 'TICK'),
+          });
+        }
+        for (let i = 0; i < config.restSecs; i++) {
+          this.ticks.push({
+            label: 'Rest',
+            labelKey: `rest.${setIdx}.${exIdx}`,
+            secs: config.restSecs - i,
+            color: 'green',
+            tts: i === 0 ? 'Rest' : undefined,
+            sfx: i === 0 ? 'START' : ((config.restSecs - i) <= 3 ? 'BEEP' : 'TICK'),
+          });
+        }
+      }
+    }
+    for (let i = 0; i < 2; i++) {
+      this.ticks.push({
+        label: 'Done!',
+        labelKey: 'done',
+        secs: 0,
+        color: 'black',
+        tts: i === 0 ? 'Done' : undefined,
+        sfx: i === 0 ? 'ALARM' : undefined,
+        done: i > 0,
+      });
+    }
   }
-  n -= 3;
-  const exLength = config.activeSecs + config.restSecs;
-  const setLength = exLength * config.exercises.length;
-  const sessionLength = setLength * config.numSets;
-  if (n >= sessionLength) {
-    return {
-      label: 'Done!',
-      labelKey: 'done',
-      secs: 0,
-      color: 'black',
-      tts: n === sessionLength ? 'Done' : undefined,
-      sfx: n === sessionLength ? 'ALARM' : undefined,
-      done: n > sessionLength,
-    };
+
+  get(n: number): Tick {
+    if (n >= this.ticks.length) {
+      return this.ticks.at(-1)!;
+    } else if (n < 0) {
+      throw new Error(`Invalid tick: ${n}`);
+    }
+    return this.ticks[n];
   }
-  const setIdx = Math.floor(n / setLength);
-  n %= setLength;
-  const exIdx = Math.floor(n / exLength);
-  const ex = config.exercises[exIdx];
-  n %= exLength;
-  if (n < config.activeSecs) {
-    return {
-      label: ex,
-      labelKey: `active.${setIdx}.${exIdx}`,
-      secs: config.activeSecs - n,
-      color: 'red',
-      tts: n === 0 ? ex : undefined,
-      sfx: (config.activeSecs - n) <= 3 ? 'BEEP' : 'TICK',
-    };
+
+  previousPhase(n: number): Tick | undefined {
+    const current = this.get(n);
+    for (let i = n - 1; i >= 0; i--) {
+      const earlier = this.get(i);
+      if (earlier.labelKey !== current.labelKey) {
+        return earlier;
+      }
+    }
+    return undefined;
   }
-  n -= config.activeSecs;
-  return {
-      label: 'Rest',
-      labelKey: `rest.${setIdx}.${exIdx}`,
-      secs: config.restSecs - n,
-      color: 'green',
-      tts: n === 0 ? 'Rest' : undefined,
-      sfx: (config.restSecs - n) <= 3 ? 'BEEP' : 'TICK',
-  };
+
+  nextPhase(n: number): Tick | undefined {
+    const current = this.get(n);
+    for (let i = n + 1; true; i++) {
+      const later = this.get(i);
+      if (later.labelKey !== current.labelKey) {
+        return later;
+      } else if (later.done) {
+        break;
+      }
+    }
+    return undefined;
+  }
 }
 
 enum TimerPhase {
@@ -105,39 +141,13 @@ function formatSeconds(secs: number) {
   return s;
 }
 
-// TODO: Do the more efficient thing and make a stateful (or at least memoized)
-// tickAt() instead of recalculating everything constantly.
-export function getPrevNext(config: TimerConfig, n: number): [[string, string]?, [string, string]?] {
-  const current = tickAt(config, n);
-  let prev: [string, string] | undefined = undefined;
-  let next: [string, string] | undefined = undefined;
-  for (let i = n - 1; i >= 0; i--) {
-    const earlier = tickAt(config, i);
-    if (earlier.labelKey !== current.labelKey) {
-      prev = [earlier.label, earlier.labelKey];
-      break;
-    }
-  }
-  for (let i = n + 1; true; i++) {
-    const later = tickAt(config, i);
-    if (later.labelKey !== current.labelKey) {
-      next = [later.label, later.labelKey];
-      break;
-    } else if (later.done) {
-      break;
-    }
-  }
-  return [prev, next];
-}
-
 export class Timer extends Component<TimerProps, TimerState> {
   private tickInterval: NodeJS.Timeout | null;
-  private beepAudio: HTMLAudioElement;
-  private tickAudio: HTMLAudioElement;
   private alarmAudio: HTMLAudioElement;
-  private tickUi: Tick;
-  private prevActivity?: [string, string];
-  private nextActivity?: [string, string];
+  private beepAudio: HTMLAudioElement;
+  private startAudio: HTMLAudioElement;
+  private tickAudio: HTMLAudioElement;
+  private tickMap: TickMap;
 
   constructor(props: TimerProps) {
     super(props);
@@ -147,11 +157,11 @@ export class Timer extends Component<TimerProps, TimerState> {
       tickCount: 0,
     };
     this.tickInterval = null;
-    this.beepAudio = new Audio(beepSound);
-    this.tickAudio = new Audio(tickSound);
     this.alarmAudio = new Audio(alarmSound);
-    this.tickUi = tickAt(props.config, 0);
-    [this.prevActivity, this.nextActivity] = getPrevNext(props.config, 0);
+    this.beepAudio = new Audio(beepSound);
+    this.startAudio = new Audio(startSound);
+    this.tickAudio = new Audio(tickSound);
+    this.tickMap = new TickMap(props.config);
     // TODO: Is this the idiomatic thing to do?
     this.tick = this.tick.bind(this);
     this.toggleTimer = this.toggleTimer.bind(this);
@@ -199,23 +209,27 @@ export class Timer extends Component<TimerProps, TimerState> {
     }
   };
 
-  triggerAudio() {
-    if (this.tickUi.tts) {
-      tts(this.tickUi.tts);
+  triggerAudio(tickCount: number) {
+    const current = this.tickMap.get(tickCount);
+    if (current.tts) {
+      tts(current.tts);
     }
-    if (this.tickUi.sfx === 'BEEP') {
+    if (current.sfx === 'START') {
+      this.startAudio.play();
+      this.tickAudio.play();
+    } else if (current.sfx === 'TICK') {
+      this.tickAudio.play();
+    } else if (current.sfx === 'BEEP') {
       this.beepAudio.play();
       this.tickAudio.play();
-    } else if (this.tickUi.sfx === 'TICK') {
-      this.tickAudio.play();
-    } else if (this.tickUi.sfx === 'ALARM') {
+    } else if (current.sfx === 'ALARM') {
       this.alarmAudio.play();
     }
   }
 
   tick() {
     if (this.state.firstTick) {
-      this.triggerAudio();
+      this.triggerAudio(0);
       this.setState({ firstTick: false });
       return;
     }
@@ -226,10 +240,8 @@ export class Timer extends Component<TimerProps, TimerState> {
       return;
     }
     const tickCount = this.state.tickCount + 1;
-    this.tickUi = tickAt(this.props.config, tickCount);
-    [this.prevActivity, this.nextActivity] = getPrevNext(this.props.config, tickCount);
-    this.triggerAudio();
-    if (this.tickUi.done) {
+    this.triggerAudio(tickCount);
+    if (this.tickMap.get(tickCount).done) {
       this.clearTickInterval();
       this.props.wakelock.release();
       this.setState({ phase: TimerPhase.Done, tickCount: tickCount });
@@ -239,6 +251,9 @@ export class Timer extends Component<TimerProps, TimerState> {
   };
 
   render() {
+    const current = this.tickMap.get(this.state.tickCount);
+    const prev = this.tickMap.previousPhase(this.state.tickCount);
+    const next = this.tickMap.nextPhase(this.state.tickCount);
     return (
       <div className="Timer">
         <h2>HIIT Timer</h2>
@@ -257,17 +272,21 @@ export class Timer extends Component<TimerProps, TimerState> {
           </button>
         </div>
         <div className="Timer-face">
-          <div className="Timer-item Timer-seconds" key={this.tickUi.labelKey + '-secs'}>
-            <div className="Timer-text">{formatSeconds(this.tickUi.secs)}</div>
+          <div className="Timer-item Timer-seconds" key={current.labelKey + '-secs'}>
+            <div className="Timer-text">{formatSeconds(current.secs)}</div>
           </div>
-          <div className="Timer-item Timer-prev" key={this.prevActivity?.[1] || 'no-prev'}>
-            <div className="Timer-text">{this.prevActivity?.[0] || ''}</div>
+          <div className="Timer-item Timer-prev" key={prev?.labelKey || 'no-prev'}>
+            <div className="Timer-text" style={{color: prev?.color || 'black'}}>
+              {prev?.label || ''}
+            </div>
           </div>
-          <div className="Timer-item Timer-current" key={this.tickUi.labelKey}>
-            <div className="Timer-text" style={{color: this.tickUi.color}}>{this.tickUi.label}</div>
+          <div className="Timer-item Timer-current" key={current.labelKey}>
+            <div className="Timer-text" style={{color: current.color}}>
+              {current.label}
+            </div>
           </div>
-          <div className="Timer-item Timer-next" key={this.nextActivity?.[1] || 'no-next'}>
-            <div className="Timer-text">{this.nextActivity?.[0]}</div>
+          <div className="Timer-item Timer-next" key={next?.labelKey || 'no-next'}>
+            <div className="Timer-text">{next?.label}</div>
           </div>
         </div>
         <p>Press spacebar to start/pause the timer.</p>

@@ -1,16 +1,16 @@
-import { getPrevNext, tickAt } from './Timer';
+import { TickMap } from './Timer';
 
 describe('Timer state machine', () => {
-  const cfg = {
+  const tm = new TickMap({
     exercises: ['ex1', 'ex2'],
     numSets: 2,
     activeSecs: 5,
     restSecs: 5,
-  };
+  });
   it('goes through phases in order', () => {
     const phases: [string, string][] = [];
     for (let i = 0; true; i++) {
-      const t = tickAt(cfg, i);
+      const t = tm.get(i);
       if (phases.length === 0 || phases.at(-1)![1] !== t.labelKey) {
         phases.push([t.label, t.labelKey]);
       }
@@ -33,24 +33,24 @@ describe('Timer state machine', () => {
       ['Done!', 'done'],
     ]);
   });
-  it('getPrevNext works', () => {
-    let [prev, next] = getPrevNext(cfg, 0);
+  it('previousPhase and nextPhase work', () => {
+    let [prev, next] = [tm.previousPhase(0), tm.nextPhase(0)];
     expect(prev).toBeUndefined();
-    expect(next).toEqual(['ex1', 'active.0.0']);
-    [prev, next] = getPrevNext(cfg, 3);
-    expect(prev).toEqual(['Get Ready...', 'ready']);
-    expect(next).toEqual(['Rest', 'rest.0.0']);
-    [prev, next] = getPrevNext(cfg, 8);
-    expect(prev).toEqual(['ex1', 'active.0.0']);
-    expect(next).toEqual(['ex2', 'active.0.1']);
-    [prev, next] = getPrevNext(cfg, 43);
-    expect(prev).toEqual(['Rest', 'rest.1.1']);
+    expect(next).toEqual(expect.objectContaining({ labelKey: 'active.0.0' }));
+    [prev, next] = [tm.previousPhase(3), tm.nextPhase(3)];
+    expect(prev).toEqual(expect.objectContaining({ labelKey: 'ready' }));
+    expect(next).toEqual(expect.objectContaining({ labelKey: 'rest.0.0' }));
+    [prev, next] = [tm.previousPhase(8), tm.nextPhase(8)];
+    expect(prev).toEqual(expect.objectContaining({ labelKey: 'active.0.0' }));
+    expect(next).toEqual(expect.objectContaining({ labelKey: 'active.0.1' }));
+    [prev, next] = [tm.previousPhase(43), tm.nextPhase(43)];
+    expect(prev).toEqual(expect.objectContaining({ labelKey: 'rest.1.1' }));
     expect(next).toBeUndefined();
   });
   it('ready phase tts, then beeping countdown', () => {
     let tick = 0;
     // TTS and beep
-    expect(tickAt(cfg, tick++)).toEqual({
+    expect(tm.get(tick++)).toEqual({
       label: 'Get Ready...',
       labelKey: 'ready',
       secs: 3,
@@ -59,14 +59,14 @@ describe('Timer state machine', () => {
       sfx: 'BEEP',
     });
     // Then count down with beeps
-    expect(tickAt(cfg, tick++)).toEqual({
+    expect(tm.get(tick++)).toEqual({
       label: 'Get Ready...',
       labelKey: 'ready',
       secs: 2,
       color: 'orange',
       sfx: 'BEEP',
     });
-    expect(tickAt(cfg, tick++)).toEqual({
+    expect(tm.get(tick++)).toEqual({
       label: 'Get Ready...',
       labelKey: 'ready',
       secs: 1,
@@ -76,17 +76,17 @@ describe('Timer state machine', () => {
   });
   it('does active then rest', () => {
     let tick = 3;
-    // Exercise name TTS/tick first
-    expect(tickAt(cfg, tick++)).toEqual({
+    // Exercise name TTS/start first
+    expect(tm.get(tick++)).toEqual({
       label: 'ex1',
       labelKey: 'active.0.0',
       secs: 5,
       color: 'red',
       tts: 'ex1',
-      sfx: 'TICK',
+      sfx: 'START',
     });
-    // Then continue ticking
-    expect(tickAt(cfg, tick++)).toEqual({
+    // Then tick
+    expect(tm.get(tick++)).toEqual({
       label: 'ex1',
       labelKey: 'active.0.0',
       secs: 4,
@@ -94,38 +94,38 @@ describe('Timer state machine', () => {
       sfx: 'TICK',
     });
     // Then beeping 3-2-1
-    expect(tickAt(cfg, tick++)).toEqual({
+    expect(tm.get(tick++)).toEqual({
       label: 'ex1',
       labelKey: 'active.0.0',
       secs: 3,
       color: 'red',
       sfx: 'BEEP',
     });
-    expect(tickAt(cfg, tick++)).toEqual({
+    expect(tm.get(tick++)).toEqual({
       label: 'ex1',
       labelKey: 'active.0.0',
       secs: 2,
       color: 'red',
       sfx: 'BEEP',
     });
-    expect(tickAt(cfg, tick++)).toEqual({
+    expect(tm.get(tick++)).toEqual({
       label: 'ex1',
       labelKey: 'active.0.0',
       secs: 1,
       color: 'red',
       sfx: 'BEEP',
     });
-    // Then Rest TTS/tick
-    expect(tickAt(cfg, tick++)).toEqual({
+    // Then Rest TTS/start
+    expect(tm.get(tick++)).toEqual({
       label: 'Rest',
       labelKey: 'rest.0.0',
       secs: 5,
       color: 'green',
       tts: 'Rest',
-      sfx: 'TICK',
+      sfx: 'START',
     });
-    // Then continue ticking
-    expect(tickAt(cfg, tick++)).toEqual({
+    // Then tick
+    expect(tm.get(tick++)).toEqual({
       label: 'Rest',
       labelKey: 'rest.0.0',
       secs: 4,
@@ -133,21 +133,21 @@ describe('Timer state machine', () => {
       sfx: 'TICK',
     });
     // Then 3-2-1 beep
-    expect(tickAt(cfg, tick++)).toEqual({
+    expect(tm.get(tick++)).toEqual({
       label: 'Rest',
       labelKey: 'rest.0.0',
       secs: 3,
       color: 'green',
       sfx: 'BEEP',
     });
-    expect(tickAt(cfg, tick++)).toEqual({
+    expect(tm.get(tick++)).toEqual({
       label: 'Rest',
       labelKey: 'rest.0.0',
       secs: 2,
       color: 'green',
       sfx: 'BEEP',
     });
-    expect(tickAt(cfg, tick++)).toEqual({
+    expect(tm.get(tick++)).toEqual({
       label: 'Rest',
       labelKey: 'rest.0.0',
       secs: 1,
@@ -158,7 +158,7 @@ describe('Timer state machine', () => {
   it('permanently ends in done', () => {
     let tick = 43;
     // Exactly at the count
-    expect(tickAt(cfg, tick++)).toEqual({
+    expect(tm.get(tick++)).toEqual({
       label: 'Done!',
       labelKey: 'done',
       secs: 0,
@@ -168,14 +168,14 @@ describe('Timer state machine', () => {
       done: false,
     });
     // Every one after has no tts/sfx and is "done"
-    expect(tickAt(cfg, tick++)).toEqual({
+    expect(tm.get(tick++)).toEqual({
       label: 'Done!',
       labelKey: 'done',
       secs: 0,
       color: 'black',
       done: true,
     });
-    expect(tickAt(cfg, tick++)).toEqual({
+    expect(tm.get(tick++)).toEqual({
       label: 'Done!',
       labelKey: 'done',
       secs: 0,
