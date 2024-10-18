@@ -54,6 +54,7 @@ describe('Timer state machine', () => {
       label: 'Get Ready...',
       labelKey: 'ready',
       secs: 3,
+      progress: 0,
       color: 'orange',
       tts: 'Get ready',
       sfx: 'BEEP',
@@ -63,6 +64,7 @@ describe('Timer state machine', () => {
       label: 'Get Ready...',
       labelKey: 'ready',
       secs: 2,
+      progress: 1/3,
       color: 'orange',
       sfx: 'BEEP',
     });
@@ -70,6 +72,7 @@ describe('Timer state machine', () => {
       label: 'Get Ready...',
       labelKey: 'ready',
       secs: 1,
+      progress: 2/3,
       color: 'orange',
       sfx: 'BEEP',
     });
@@ -81,6 +84,7 @@ describe('Timer state machine', () => {
       label: 'ex1',
       labelKey: 'active.0.0',
       secs: 5,
+      progress: 0,
       color: 'red',
       tts: 'ex1',
       sfx: 'START',
@@ -90,6 +94,7 @@ describe('Timer state machine', () => {
       label: 'ex1',
       labelKey: 'active.0.0',
       secs: 4,
+      progress: 1/5,
       color: 'red',
       sfx: 'TICK',
     });
@@ -98,6 +103,7 @@ describe('Timer state machine', () => {
       label: 'ex1',
       labelKey: 'active.0.0',
       secs: 3,
+      progress: 2/5,
       color: 'red',
       sfx: 'BEEP',
     });
@@ -105,6 +111,7 @@ describe('Timer state machine', () => {
       label: 'ex1',
       labelKey: 'active.0.0',
       secs: 2,
+      progress: 3/5,
       color: 'red',
       sfx: 'BEEP',
     });
@@ -112,6 +119,7 @@ describe('Timer state machine', () => {
       label: 'ex1',
       labelKey: 'active.0.0',
       secs: 1,
+      progress: 4/5,
       color: 'red',
       sfx: 'BEEP',
     });
@@ -120,6 +128,7 @@ describe('Timer state machine', () => {
       label: 'Rest',
       labelKey: 'rest.0.0',
       secs: 5,
+      progress: 0,
       color: 'green',
       tts: 'Rest',
       sfx: 'START',
@@ -129,6 +138,7 @@ describe('Timer state machine', () => {
       label: 'Rest',
       labelKey: 'rest.0.0',
       secs: 4,
+      progress: 1/5,
       color: 'green',
       sfx: 'TICK',
     });
@@ -137,6 +147,7 @@ describe('Timer state machine', () => {
       label: 'Rest',
       labelKey: 'rest.0.0',
       secs: 3,
+      progress: 2/5,
       color: 'green',
       sfx: 'BEEP',
     });
@@ -144,6 +155,7 @@ describe('Timer state machine', () => {
       label: 'Rest',
       labelKey: 'rest.0.0',
       secs: 2,
+      progress: 3/5,
       color: 'green',
       sfx: 'BEEP',
     });
@@ -151,6 +163,7 @@ describe('Timer state machine', () => {
       label: 'Rest',
       labelKey: 'rest.0.0',
       secs: 1,
+      progress: 4/5,
       color: 'green',
       sfx: 'BEEP',
     });
@@ -162,6 +175,7 @@ describe('Timer state machine', () => {
       label: 'Done!',
       labelKey: 'done',
       secs: 0,
+      progress: 1,
       color: 'black',
       tts: 'Done',
       sfx: 'ALARM',
@@ -172,6 +186,7 @@ describe('Timer state machine', () => {
       label: 'Done!',
       labelKey: 'done',
       secs: 0,
+      progress: 1,
       color: 'black',
       done: true,
     });
@@ -179,6 +194,7 @@ describe('Timer state machine', () => {
       label: 'Done!',
       labelKey: 'done',
       secs: 0,
+      progress: 1,
       color: 'black',
       done: true,
     });

@@ -19,6 +19,7 @@ export interface Tick {
   labelKey: string;
   secs: number;
   color: string;
+  progress: number;
   tts?: string;
   sfx?: 'START' | 'TICK' | 'BEEP' | 'ALARM';
   done?: boolean;
@@ -34,6 +35,7 @@ export class TickMap {
         label: 'Get Ready...',
         labelKey: 'ready',
         secs: 3 - i,
+        progress: i / 3,
         color: 'orange',
         tts: i === 0 ? 'Get ready' : undefined,
         sfx: 'BEEP',
@@ -47,6 +49,7 @@ export class TickMap {
             label: ex,
             labelKey: `active.${setIdx}.${exIdx}`,
             secs: config.activeSecs - i,
+            progress: i / config.activeSecs,
             color: 'red',
             tts: i === 0 ? ex : undefined,
             sfx: i === 0 ? 'START' : ((config.activeSecs - i) <= 3 ? 'BEEP' : 'TICK'),
@@ -57,6 +60,7 @@ export class TickMap {
             label: 'Rest',
             labelKey: `rest.${setIdx}.${exIdx}`,
             secs: config.restSecs - i,
+            progress: i / config.restSecs,
             color: 'green',
             tts: i === 0 ? 'Rest' : undefined,
             sfx: i === 0 ? 'START' : ((config.restSecs - i) <= 3 ? 'BEEP' : 'TICK'),
@@ -69,6 +73,7 @@ export class TickMap {
         label: 'Done!',
         labelKey: 'done',
         secs: 0,
+        progress: 1.0,
         color: 'black',
         tts: i === 0 ? 'Done' : undefined,
         sfx: i === 0 ? 'ALARM' : undefined,
@@ -139,6 +144,10 @@ function formatSeconds(secs: number) {
   secs %= 60;
   s += secs.toString().padStart(2, '0');
   return s;
+}
+
+function lerp(a: number, b: number, t: number): number {
+  return (a + (b-a)*t);
 }
 
 export class Timer extends Component<TimerProps, TimerState> {
@@ -254,6 +263,10 @@ export class Timer extends Component<TimerProps, TimerState> {
     const current = this.tickMap.get(this.state.tickCount);
     const prev = this.tickMap.previousPhase(this.state.tickCount);
     const next = this.tickMap.nextPhase(this.state.tickCount);
+    const col = lerp(230, 190, current.progress);
+    const outerOverrides = {
+      backgroundColor: `rgb(${col}, ${col}, ${col})`,
+    };
     return (
       <div className="Timer">
         <h2>HIIT Timer</h2>
@@ -288,6 +301,8 @@ export class Timer extends Component<TimerProps, TimerState> {
           <div className="Timer-item Timer-next" key={next?.labelKey || 'no-next'}>
             <div className="Timer-text">{next?.label}</div>
           </div>
+          <div className="Timer-inner-circle"></div>
+          <div className="Timer-outer-circle" style={outerOverrides}></div>
         </div>
         <p>Press spacebar to start/pause the timer.</p>
       </div>

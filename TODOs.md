@@ -3,7 +3,7 @@
 - The config page: 
   - Ability to paste multiple elements
 - The timer page:
-  - Style timer UI similarly to the config
+  - Final style tweaks
 - Cleanup
   - Rebuild PlainTextEditable from scratch
   - Move Timer to function style component
