@@ -43,6 +43,14 @@
   border: 1px solid black;
   border-radius: 8px;
   font-size: 28px;
+  animation: Timer-anim-face .6s;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0);
+}
+
+@keyframes Timer-anim-face {
+  0% { box-shadow: inset 0 0 0 rgba(0, 0, 0, .2); }
+  30% { box-shadow: inset 0 0 10px rgba(0, 0, 0, .1); }
+  100% { box-shadow: inset 0 0 25px rgba(0, 0, 0, 0); }
 }
 
 .Timer-item {
@@ -56,15 +64,20 @@
 }
 
 .Timer-seconds .Timer-text {
-  animation: Timer-anim-seconds-text 1s ease-in;
-  font-size: 30px;
-  scale: 1;
+  animation: Timer-anim-seconds-text .8s ease-in;
+  font-size: 40px;
+  font-family: seven-segment, sans-serif;
+  color: rgb(0, 0, 0);
+}
+
+@font-face {
+  font-family: 'seven-segment';
+  src: url(./7segment.ttf) format('truetype'), url(./7segment.woff) format('woff');
 }
 
 @keyframes Timer-anim-seconds-text {
-  0% { scale: 1; }
-  10% { scale: 1.1; }
-  15%, 100% { scale: 1; }
+  0% { color: rgb(80, 80, 80); }
+  100% { color: rgb(0, 0, 0); }
 }
 
 .Timer-prev {

@@ -9,6 +9,10 @@ This favicon was generated using the following graphic from Twitter Twemoji:
 - Author: [Copyright 2020 Twitter, Inc and other contributors](https://github.com/twitter/twemoji)
 - License: [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 
+## Fonts
+
+The clock face font is from [Torinak](https://torinak.com/font/7-segment) and is available under the [SIL OFL](https://scripts.sil.org/OFL).
+
 ## SFX
 
 - The alarm sound is from [freesound](https://freesound.org/people/JulesV4/sounds/615949/) and is available under [CC0](https://creativecommons.org/public-domain/cc0/) (i.e., public domain).

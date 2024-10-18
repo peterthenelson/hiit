@@ -271,7 +271,7 @@ export class Timer extends Component<TimerProps, TimerState> {
             <PlayPauseIcon pointerEvents="none" />
           </button>
         </div>
-        <div className="Timer-face">
+        <div className="Timer-face" key={current.labelKey + '-face'}>
           <div className="Timer-item Timer-seconds" key={current.labelKey + '-secs'}>
             <div className="Timer-text">{formatSeconds(current.secs)}</div>
           </div>
