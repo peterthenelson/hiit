@@ -264,6 +264,9 @@ export class Timer extends Component<TimerProps, TimerState> {
     const prev = this.tickMap.previousPhase(this.state.tickCount);
     const next = this.tickMap.nextPhase(this.state.tickCount);
     const col = lerp(230, 190, current.progress);
+    const secondsOverrides = {
+      borderColor: `rgb(${col}, ${col}, ${col})`,
+    };
     const outerOverrides = {
       backgroundColor: `rgb(${col}, ${col}, ${col})`,
     };
@@ -285,21 +288,25 @@ export class Timer extends Component<TimerProps, TimerState> {
           </button>
         </div>
         <div className="Timer-face" key={current.labelKey + '-face'}>
-          <div className="Timer-item Timer-seconds" key={current.labelKey + '-secs'}>
-            <div className="Timer-text">{formatSeconds(current.secs)}</div>
-          </div>
-          <div className="Timer-item Timer-prev" key={prev?.labelKey || 'no-prev'}>
-            <div className="Timer-text" style={{color: prev?.color || 'black'}}>
-              {prev?.label || ''}
-            </div>
-          </div>
           <div className="Timer-item Timer-current" key={current.labelKey}>
             <div className="Timer-text" style={{color: current.color}}>
               {current.label}
             </div>
           </div>
+          <div className="Timer-item Timer-current-old" key={prev?.labelKey || 'no-current-old'}>
+            <div className="Timer-text" style={{color: prev?.color || 'black'}}>
+              {prev?.label || ''}
+            </div>
+          </div>
+          <div className="Timer-item Timer-seconds" key={current.labelKey + '-secs'}>
+            <div className="Timer-text">{formatSeconds(current.secs)}</div>
+          </div>
+          <div className="Timer-seconds-border" style={secondsOverrides}></div>
+          <div className="Timer-item Timer-next-old" key={prev ? current.labelKey + '-next-old' : 'no-next-old'}>
+            <div className="Timer-text">{prev ? 'Next: ' + current.label : ''}</div>
+          </div>
           <div className="Timer-item Timer-next" key={next?.labelKey || 'no-next'}>
-            <div className="Timer-text">{next?.label}</div>
+            <div className="Timer-text">{next ? 'Next: ' + next.label : ''}</div>
           </div>
           <div className="Timer-inner-circle"></div>
           <div className="Timer-outer-circle" style={outerOverrides}></div>
