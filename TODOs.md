@@ -1,9 +1,5 @@
 # TODOs
 
-- The config page: 
-  - Ability to paste multiple elements
-- The timer page:
-  - Final style tweaks
 - Cleanup
   - Rebuild PlainTextEditable from scratch
   - Move Timer to function style component

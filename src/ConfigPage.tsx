@@ -1,6 +1,6 @@
 import React from 'react';
 import { SetStateAction, useEffect, useRef, useState } from 'react';
-import { PlainTextEditable, setCaret } from './PlainTextEditable';
+import { PlainTextEditable, getSelection, setCaret } from './PlainTextEditable';
 import { armsPreset, chestPreset, defaultPreset, Page, saveConfigToLocalStorage, TimerConfig } from './config';
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { PlusIcon, ClipboardDocumentListIcon, XMarkIcon } from '@heroicons/react/20/solid'
@@ -83,12 +83,7 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
   };
 
   const handleEditKey = (item: Item, index: number, e: React.KeyboardEvent<HTMLElement>) => {
-    const sel = document.getSelection();
-    const range = sel?.getRangeAt(0);
-    console.assert(range?.startContainer === range?.endContainer);
-    const isInFakeTextNode = range?.startContainer !== range?.startContainer.parentNode?.childNodes.item(0);
-    const startOffset = range ? (isInFakeTextNode ? item.content.length : range.startOffset) : -1;
-    const endOffset = range ? (isInFakeTextNode ? item.content.length : range.endOffset) : -1;
+    const [startOffset, endOffset] = getSelection(item.content.length);
     if (e.code === 'Backspace' &&
         startOffset === endOffset &&
         startOffset === 0 &&
@@ -98,7 +93,7 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
       setFocus({ type: 'ITEM', id: items[index-1].id, offset: items[index-1].content.length });
       items[index-1].content += item.content;
       updateItems(items);
-    } else if (e.code === 'Enter' && range) {
+    } else if (e.code === 'Enter' && startOffset !== -1) {
       // Enter -> start new item w/focus at front (possibly splitting current)
       const remainder = item.content.slice(endOffset);
       items[index].content = item.content.slice(0, startOffset);
@@ -124,6 +119,30 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
       }
       setFocus({ type: 'ITEM', id: items[index+1].id, offset: 0 });
     }
+  };
+
+  const handlePaste = (item: Item, index: number, event: React.ClipboardEvent<HTMLElement>) => {
+    const txt = event.clipboardData.getData('text/plain');
+    if (!txt.includes('\n')) {
+      return;
+    }
+    const [startOffset, endOffset] = getSelection(item.content.length);
+    event.preventDefault();
+    // Break into multiple items at the newlines
+    const lines = txt.split('\n');
+    const remainder = item.content.slice(endOffset);
+    items[index].content = item.content.slice(0, startOffset) + lines.shift();
+    const newItems: Item[] = [];
+    let id = nextId;
+    const offset = lines.at(-1)?.length;
+    for (const line of lines) {
+      newItems.push({ id: id++, content: line });
+    }
+    newItems[newItems.length - 1].content += remainder;
+    items.splice(index + 1, 0, ...newItems);
+    setFocus({ type: 'ITEM', id: id - 1, offset: offset });
+    setNextId(id);
+    updateItems(items);
   };
 
   const handleStart = () => {
@@ -209,6 +228,7 @@ export function ConfigPage({ config, setConfig, setPage }: ConfigPageProps) {
                         onFocus={() => setFocus({ type: 'ITEM', id: item.id })}
                         onBlur={() => setFocus({ type: 'NONE' })}
                         onKeyDown={(e) => handleEditKey(item, index, e)}
+                        onPaste={(e) => handlePaste(item, index, e)}
                         className="ConfigPage-editable"
                         innerRef={hasFocus(item, focus) ? focusRef : undefined}/>
                       <div
