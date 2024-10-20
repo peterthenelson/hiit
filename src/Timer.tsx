@@ -30,12 +30,12 @@ export class TickMap {
 
   constructor(config: TimerConfig) {
     this.ticks = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 5; i++) {
       this.ticks.push({
         label: 'Get Ready...',
         labelKey: 'ready',
-        secs: 3 - i,
-        progress: i / 3,
+        secs: 5 - i,
+        progress: i / 5,
         color: 'orange',
         tts: i === 0 ? 'Get ready' : undefined,
         sfx: 'BEEP',

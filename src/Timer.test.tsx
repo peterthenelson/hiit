@@ -37,13 +37,13 @@ describe('Timer state machine', () => {
     let [prev, next] = [tm.previousPhase(0), tm.nextPhase(0)];
     expect(prev).toBeUndefined();
     expect(next).toEqual(expect.objectContaining({ labelKey: 'active.0.0' }));
-    [prev, next] = [tm.previousPhase(3), tm.nextPhase(3)];
+    [prev, next] = [tm.previousPhase(5), tm.nextPhase(5)];
     expect(prev).toEqual(expect.objectContaining({ labelKey: 'ready' }));
     expect(next).toEqual(expect.objectContaining({ labelKey: 'rest.0.0' }));
-    [prev, next] = [tm.previousPhase(8), tm.nextPhase(8)];
+    [prev, next] = [tm.previousPhase(10), tm.nextPhase(10)];
     expect(prev).toEqual(expect.objectContaining({ labelKey: 'active.0.0' }));
     expect(next).toEqual(expect.objectContaining({ labelKey: 'active.0.1' }));
-    [prev, next] = [tm.previousPhase(43), tm.nextPhase(43)];
+    [prev, next] = [tm.previousPhase(45), tm.nextPhase(45)];
     expect(prev).toEqual(expect.objectContaining({ labelKey: 'rest.1.1' }));
     expect(next).toBeUndefined();
   });
@@ -53,7 +53,7 @@ describe('Timer state machine', () => {
     expect(tm.get(tick++)).toEqual({
       label: 'Get Ready...',
       labelKey: 'ready',
-      secs: 3,
+      secs: 5,
       progress: 0,
       color: 'orange',
       tts: 'Get ready',
@@ -63,8 +63,24 @@ describe('Timer state machine', () => {
     expect(tm.get(tick++)).toEqual({
       label: 'Get Ready...',
       labelKey: 'ready',
+      secs: 4,
+      progress: 1/5,
+      color: 'orange',
+      sfx: 'BEEP',
+    });
+    expect(tm.get(tick++)).toEqual({
+      label: 'Get Ready...',
+      labelKey: 'ready',
+      secs: 3,
+      progress: 2/5,
+      color: 'orange',
+      sfx: 'BEEP',
+    });
+    expect(tm.get(tick++)).toEqual({
+      label: 'Get Ready...',
+      labelKey: 'ready',
       secs: 2,
-      progress: 1/3,
+      progress: 3/5,
       color: 'orange',
       sfx: 'BEEP',
     });
@@ -72,13 +88,13 @@ describe('Timer state machine', () => {
       label: 'Get Ready...',
       labelKey: 'ready',
       secs: 1,
-      progress: 2/3,
+      progress: 4/5,
       color: 'orange',
       sfx: 'BEEP',
     });
   });
   it('does active then rest', () => {
-    let tick = 3;
+    let tick = 5;
     // Exercise name TTS/start first
     expect(tm.get(tick++)).toEqual({
       label: 'ex1',
@@ -169,7 +185,7 @@ describe('Timer state machine', () => {
     });
   });
   it('permanently ends in done', () => {
-    let tick = 43;
+    let tick = 45;
     // Exactly at the count
     expect(tm.get(tick++)).toEqual({
       label: 'Done!',
