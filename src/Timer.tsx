@@ -171,7 +171,6 @@ export class Timer extends Component<TimerProps, TimerState> {
     this.startAudio = new Audio(startSound);
     this.tickAudio = new Audio(tickSound);
     this.tickMap = new TickMap(props.config);
-    // TODO: Is this the idiomatic thing to do?
     this.tick = this.tick.bind(this);
     this.toggleTimer = this.toggleTimer.bind(this);
     this.handleSpaceBarPress = this.handleSpaceBarPress.bind(this);
